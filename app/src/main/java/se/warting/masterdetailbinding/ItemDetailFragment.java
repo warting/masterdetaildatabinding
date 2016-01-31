@@ -1,14 +1,15 @@
 package se.warting.masterdetailbinding;
 
 import android.app.Activity;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
+import se.warting.masterdetailbinding.databinding.ItemDetailBinding;
 import se.warting.masterdetailbinding.dummy.DummyContent;
 
 /**
@@ -36,6 +37,14 @@ public class ItemDetailFragment extends Fragment {
     public ItemDetailFragment() {
     }
 
+    public static ItemDetailFragment createFragment(String id) {
+        Bundle arguments = new Bundle();
+        arguments.putString(ARG_ITEM_ID, id);
+        ItemDetailFragment fragment = new ItemDetailFragment();
+        fragment.setArguments(arguments);
+        return fragment;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,13 +66,10 @@ public class ItemDetailFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.item_detail, container, false);
 
-        // Show the dummy content as text in a TextView.
-        if (mItem != null) {
-            ((TextView) rootView.findViewById(R.id.item_detail)).setText(mItem.details);
-        }
+        ItemDetailBinding rootView = DataBindingUtil.inflate(inflater, R.layout.item_detail, container, false);
+        rootView.setItem(mItem);
 
-        return rootView;
+        return rootView.getRoot();
     }
 }

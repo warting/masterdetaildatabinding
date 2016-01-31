@@ -1,6 +1,5 @@
 package se.warting.masterdetailbinding;
 
-import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -11,11 +10,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import java.util.List;
 
 import se.warting.masterdetailbinding.databinding.ActivityItemListBinding;
+import se.warting.masterdetailbinding.databinding.ItemListContentBinding;
 import se.warting.masterdetailbinding.dummy.DummyContent;
 
 /**
@@ -81,35 +80,20 @@ public class ItemListActivity extends AppCompatActivity {
 
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_list_content, parent, false);
+
+            ItemListContentBinding view = DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()), R.layout.item_list_content, parent, false);
             return new ViewHolder(view);
         }
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
             holder.mItem = mValues.get(position);
-            holder.mIdView.setText(mValues.get(position).id);
-            holder.mContentView.setText(mValues.get(position).content);
-
-            holder.mView.setOnClickListener(new View.OnClickListener() {
+            holder.mView.setItem(mValues.get(position));
+            holder.mView.setHandlers(new MyHandlers(holder.mItem.id));
+            holder.mView.getRoot().setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (mTwoPane) {
-                        Bundle arguments = new Bundle();
-                        arguments.putString(ItemDetailFragment.ARG_ITEM_ID, holder.mItem.id);
-                        ItemDetailFragment fragment = new ItemDetailFragment();
-                        fragment.setArguments(arguments);
-                        getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.item_detail_container, fragment)
-                                .commit();
-                    } else {
-                        Context context = v.getContext();
-                        Intent intent = new Intent(context, ItemDetailActivity.class);
-                        intent.putExtra(ItemDetailFragment.ARG_ITEM_ID, holder.mItem.id);
 
-                        context.startActivity(intent);
-                    }
                 }
             });
         }
@@ -120,21 +104,39 @@ public class ItemListActivity extends AppCompatActivity {
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {
-            public final View mView;
-            public final TextView mIdView;
-            public final TextView mContentView;
+            public final ItemListContentBinding mView;
             public DummyContent.DummyItem mItem;
 
-            public ViewHolder(View view) {
-                super(view);
+            public ViewHolder(ItemListContentBinding view) {
+                super(view.getRoot());
                 mView = view;
-                mIdView = (TextView) view.findViewById(R.id.id);
-                mContentView = (TextView) view.findViewById(R.id.content);
             }
 
             @Override
             public String toString() {
-                return super.toString() + " '" + mContentView.getText() + "'";
+                return super.toString() + " '" + mView.content.getText() + "'";
+            }
+        }
+
+    }
+
+    public class MyHandlers {
+        private final String id;
+
+        public MyHandlers(String id) {
+            this.id = id;
+        }
+
+        public void onListItemClicked(View view) {
+            if (mTwoPane) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.item_detail_container, ItemDetailFragment.createFragment(id))
+                        .commit();
+            } else {
+                Intent intent = new Intent(ItemListActivity.this, ItemDetailActivity.class);
+                intent.putExtra(ItemDetailFragment.ARG_ITEM_ID, id);
+
+                startActivity(intent);
             }
         }
     }

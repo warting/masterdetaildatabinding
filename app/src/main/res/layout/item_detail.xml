@@ -1,12 +1,21 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <data>
+
+        <variable
+            name="item"
+            type="se.warting.masterdetailbinding.dummy.DummyContent.DummyItem" />
+    </data>
+
     <TextView
         android:id="@+id/item_detail"
         style="?android:attr/textAppearanceLarge"
+
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="16dp"
+        android:text="@{item.details}"
         android:textIsSelectable="true"
         tools:context="se.warting.masterdetailbinding.ItemDetailFragment" />
 </layout>
